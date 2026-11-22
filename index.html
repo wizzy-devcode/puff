@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Puff — Air Purifier for Harmattan</title>
+<meta name="description" content="Puff pulls the dust out of your room, hums quietly at night, and keeps running when the power goes out. A product page concept.">
+<meta name="theme-color" content="#f3d9bf">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='7' y='2' width='18' height='28' rx='9' fill='%23b4501d'/%3E%3Ccircle cx='16' cy='11' r='5' fill='%23fbefe3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+
+  /* Each mode swaps this set of colours; everything else follows. */
+  .page {
+    --bg: #f3d9bf; --shell: #fbefe3; --ink: #3a2216; --sub: #6b4632; --btn: #b4501d; --glow: #ff8a3d;
+    --particle: #b9773f; --p-op: .85; --drift: 6s; --spin: .6s;
+    font-family: 'DM Sans', system-ui, sans-serif; color: var(--ink); background: var(--bg);
+    min-height: 100vh; transition: background-color .7s ease, color .7s ease;
+  }
+  .page[data-mode="sleep"] {
+    --bg: #dcdaf3; --shell: #f3f2fd; --ink: #1e1c3f; --sub: #4a4778; --btn: #4b48c9; --glow: #a29fff;
+    --particle: #ffffff; --p-op: .95; --drift: 14s; --spin: 5s;
+  }
+  .page[data-mode="fresh"] {
+    --bg: #d2eddb; --shell: #f1faf4; --ink: #11301f; --sub: #2f5a40; --btn: #1f7a4a; --glow: #46d68b;
+    --particle: #5fb886; --p-op: .7; --drift: 10s; --spin: 1.8s;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 24px 4vw 48px; }
+  .unb { font-family: 'Unbounded', system-ui, sans-serif; }
+  .sub { color: var(--sub); }
+
+  .topbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: 'Unbounded', system-ui, sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -.02em; }
+  .nav { display: flex; flex-wrap: wrap; align-items: center; gap: 28px; font-size: 16px; font-weight: 500; }
+  .nav a { text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+  .pill { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border-radius: 999px; border: 0; background: var(--btn); color: #fff; font: 700 16px/1 'DM Sans', system-ui, sans-serif; text-decoration: none; cursor: pointer; transition: background-color .7s ease, transform .15s ease; }
+  .nav a.pill:hover { text-decoration: none; }
+  .pill:hover { transform: translateY(-1px); }
+  .pill-lg { min-height: 52px; padding: 0 26px; font-size: 17px; box-shadow: 0 14px 28px -14px rgba(0,0,0,.5); }
+
+  /* Hero */
+  .hero { display: flex; flex-wrap: wrap; align-items: center; gap: 40px; padding-top: 40px; }
+  .hero-copy { flex: 1 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+  .kicker { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--sub); }
+  h1 { margin: 0; font-family: 'Unbounded', system-ui, sans-serif; font-weight: 800; font-size: clamp(46px, 6.2vw, 88px); line-height: .98; letter-spacing: -.035em; text-wrap: balance; }
+  .intro { margin: 0; font-size: 20px; line-height: 1.5; max-width: 480px; color: var(--sub); text-wrap: pretty; }
+  .modes { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+  .modes-label { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .switch { align-self: flex-start; display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; border-radius: 999px; background: rgba(255,255,255,.55); box-shadow: inset 0 2px 6px rgba(0,0,0,.06); }
+  .mode { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 999px; border: 0; background: transparent; color: var(--ink); font: 700 16px/1 'DM Sans', system-ui, sans-serif; cursor: pointer; transition: background-color .3s ease, color .3s ease, box-shadow .3s ease; }
+  .mode:hover { background: rgba(255,255,255,.6); }
+  .mode[aria-pressed="true"] { background: var(--btn); color: #fff; box-shadow: 0 8px 18px -8px rgba(0,0,0,.45); }
+  .blurb { margin: 0; font-size: 17px; line-height: 1.5; max-width: 440px; min-height: 52px; }
+  .ctas { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
+  .ctas .link { font-weight: 700; font-size: 16px; }
+
+  .stage { flex: 1 1 420px; min-width: 0; position: relative; min-height: 600px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 48px; }
+  .halo { position: absolute; width: 460px; max-width: 96%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.42); box-shadow: inset 0 0 0 18px rgba(255,255,255,.25); }
+  .dust-layer { position: absolute; inset: 0; }
+  .dust { position: absolute; left: var(--x); top: var(--y); width: var(--s); height: var(--s); border-radius: 50%; background: var(--particle); opacity: var(--p-op); animation: puff-drift calc(var(--drift) + var(--o)) ease-in-out var(--d) infinite alternate; transition: background-color .7s ease, opacity .7s ease; }
+  .device-wrap { position: relative; display: flex; flex-direction: column; align-items: center; animation: puff-float 6s ease-in-out infinite; }
+  .device { position: relative; z-index: 2; width: 270px; height: 430px; border-radius: 135px 135px 110px 110px / 120px 120px 96px 96px; background: var(--shell); box-shadow: inset -16px -20px 36px rgba(60,30,10,.12), inset 16px 18px 30px rgba(255,255,255,.9), 0 50px 70px -40px rgba(40,20,10,.45); display: flex; flex-direction: column; align-items: center; gap: 24px; padding-top: 40px; transition: background-color .7s ease; }
+  .window { width: 176px; height: 176px; border-radius: 50%; background: #2a211c; box-shadow: inset 0 10px 22px rgba(0,0,0,.55), 0 3px 0 rgba(255,255,255,.9), 0 -2px 0 rgba(0,0,0,.06); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .fan { display: block; animation: puff-spin var(--spin) linear infinite; }
+  .screen { display: flex; align-items: center; justify-content: center; gap: 10px; min-width: 160px; height: 56px; padding: 0 18px; border-radius: 20px; background: #1f1a17; box-shadow: inset 0 4px 10px rgba(0,0,0,.6), 0 2px 0 rgba(255,255,255,.9); }
+  .led { width: 10px; height: 10px; border-radius: 50%; background: var(--glow); box-shadow: 0 0 12px var(--glow); animation: puff-pulse 2.4s ease-in-out infinite; }
+  .readout { font-family: 'Unbounded', system-ui, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--glow); }
+  .nubs { display: flex; gap: 16px; }
+  .nub { width: 26px; height: 26px; border-radius: 50%; background: var(--shell); box-shadow: 3px 4px 8px rgba(60,30,10,.18), -3px -3px 6px rgba(255,255,255,.95), inset 0 0 0 1px rgba(0,0,0,.03); }
+  .nub.pressed { box-shadow: inset 3px 4px 8px rgba(60,30,10,.16), inset -3px -3px 6px rgba(255,255,255,.95); }
+  .vents { display: flex; flex-direction: column; gap: 7px; align-items: center; }
+  .vents span { width: 120px; height: 6px; border-radius: 999px; background: rgba(60,30,10,.09); }
+  .vents span:nth-child(2) { width: 132px; }
+  .floor { width: 230px; height: 34px; margin-top: -14px; border-radius: 50%; background: rgba(40,20,10,.28); filter: blur(14px); z-index: 1; }
+
+  /* Features */
+  .features { display: flex; flex-direction: column; gap: 32px; padding-top: 104px; }
+  .head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; }
+  h2 { margin: 0; font-family: 'Unbounded', system-ui, sans-serif; font-weight: 700; font-size: clamp(34px, 4.4vw, 58px); line-height: 1.02; letter-spacing: -.03em; max-width: 720px; text-wrap: balance; }
+  .head p { margin: 0; max-width: 360px; font-size: 17px; line-height: 1.5; color: var(--sub); }
+  .tiles { display: flex; flex-wrap: wrap; gap: 16px; }
+  .tile { flex: 1 1 280px; min-width: 0; min-height: 340px; padding: 32px; border-radius: 36px; background: rgba(255,255,255,.55); box-shadow: inset 0 2px 0 rgba(255,255,255,.85), 0 22px 44px -30px rgba(40,20,10,.45); display: flex; flex-direction: column; justify-content: space-between; gap: 20px; }
+  .tile h3 { margin: 0; font-family: 'Unbounded', system-ui, sans-serif; font-size: 22px; line-height: 1.2; font-weight: 700; }
+  .tile p { margin: 0; font-size: 16px; line-height: 1.5; color: var(--sub); }
+  .tile .copy { display: flex; flex-direction: column; gap: 8px; }
+  .tile-wide { flex: 2 1 560px; justify-content: flex-start; gap: 24px; }
+  .tile-solid { background: var(--btn); color: #fff; box-shadow: 0 22px 44px -30px rgba(40,20,10,.6); transition: background-color .7s ease; }
+  .tile-solid p { color: #fff; }
+  .tile-row { flex: 1 1 380px; min-height: 260px; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 28px; }
+  .tile-row .copy { flex: 1 1 180px; }
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+  .flow > span { font-size: 14px; font-weight: 700; }
+  .layer { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 112px; text-align: center; }
+  .layer .swatch { width: 84px; height: 150px; border-radius: 22px; box-shadow: inset 0 0 0 3px rgba(60,30,10,.12); }
+  .layer b { font-size: 14px; }
+  .layer small { font-size: 13px; line-height: 1.35; color: var(--sub); }
+  .mesh { background-color: #efe3d3; background-image: repeating-linear-gradient(45deg, rgba(60,30,10,.22) 0 2px, transparent 2px 9px), repeating-linear-gradient(-45deg, rgba(60,30,10,.22) 0 2px, transparent 2px 9px); }
+  .pleats { background-color: #fff; background-image: repeating-linear-gradient(90deg, rgba(60,30,10,.16) 0 3px, transparent 3px 10px); }
+  .carbon { background-color: #3a332e; background-image: radial-gradient(rgba(255,255,255,.22) 1.6px, transparent 1.8px); background-size: 9px 9px; }
+  .ring { width: 96px; height: 96px; border-radius: 50%; background: conic-gradient(#2f9b63 0 62%, #e9a23b 62% 82%, rgba(60,30,10,.1) 82% 100%); display: flex; align-items: center; justify-content: center; }
+  .ring span { width: 70px; height: 70px; border-radius: 50%; background: var(--shell); box-shadow: inset 0 3px 8px rgba(0,0,0,.12); }
+
+  .quote { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; padding-top: 104px; }
+  .quote p { margin: 0; }
+  .quote .words { max-width: 800px; font-family: 'Unbounded', system-ui, sans-serif; font-weight: 500; font-size: clamp(24px, 3vw, 40px); line-height: 1.25; letter-spacing: -.02em; }
+  .quote .who { font-size: 16px; font-weight: 700; color: var(--sub); }
+
+  .order { margin-top: 104px; border-radius: 48px; padding: 64px 48px; background: var(--btn); color: #fff; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 32px; box-shadow: 0 40px 80px -50px rgba(0,0,0,.6); transition: background-color .7s ease; }
+  .order .copy { flex: 1 1 420px; display: flex; flex-direction: column; gap: 12px; }
+  .order h2 { font-weight: 800; font-size: clamp(34px, 4.6vw, 60px); line-height: 1; }
+  .order p { margin: 0; font-size: 18px; line-height: 1.5; }
+  .order button { min-height: 56px; padding: 0 30px; border-radius: 999px; border: 0; background: #fff; color: var(--btn); font: 700 18px/1 'DM Sans', system-ui, sans-serif; cursor: pointer; box-shadow: inset 0 -3px 0 rgba(0,0,0,.08); transition: color .7s ease; }
+
+  .footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding-top: 40px; font-size: 14px; color: var(--sub); }
+
+  @keyframes puff-spin { to { transform: rotate(360deg); } }
+  @keyframes puff-drift { 0% { transform: translate(0, 0); } 100% { transform: translate(22px, -48px); } }
+  @keyframes puff-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+  @keyframes puff-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+  @media (max-width: 560px) {
+    .stage { min-height: 520px; border-radius: 32px; }
+    .device { transform: scale(.88); }
+    .order { padding: 44px 28px; border-radius: 32px; }
+    .tile { padding: 26px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page" data-mode="dust">
+<div class="wrap">
+
+  <header class="topbar">
+    <a class="logo" href="#top">
+      <svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.1 9.2 4.4 4.4 0 0 0 7 18z"/></svg>
+      puff
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#modes">Modes</a>
+      <a href="#features">Inside Puff</a>
+      <a class="pill" href="#order">Pre-order</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="top">
+    <div class="hero-copy" id="modes">
+      <p class="kicker">Air purifier · built for dry season</p>
+      <h1>Breathe through harmattan.</h1>
+      <p class="intro">Puff pulls the dust out of your room, hums quietly at night, and keeps running when the power goes out.</p>
+
+      <div class="modes">
+        <p class="modes-label" id="modes-label">Try a mode</p>
+        <div class="switch" role="group" aria-labelledby="modes-label">
+          <button type="button" class="mode" data-mode="dust" aria-pressed="true">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10a3 3 0 1 0-3-3"/><path d="M3 12h15a3 3 0 1 1-3 3"/><path d="M3 16h7"/></svg>
+            Harmattan
+          </button>
+          <button type="button" class="mode" data-mode="sleep" aria-pressed="false">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            Sleep
+          </button>
+          <button type="button" class="mode" data-mode="fresh" aria-pressed="false">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14z"/><path d="M5 19l8-8"/></svg>
+            Fresh
+          </button>
+        </div>
+        <p class="blurb" id="blurb" aria-live="polite">Harmattan mode runs the fan hard and keeps going until the dust in the room settles.</p>
+      </div>
+
+      <div class="ctas">
+        <a class="pill pill-lg" href="#order">Pre-order — &#8358;45,000</a>
+        <a class="link" href="#features">See what's inside</a>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="halo" aria-hidden="true"></div>
+      <div class="dust-layer" aria-hidden="true">
+        <span class="dust" style="--x:8%;--y:20%;--s:8px;--o:0s;--d:0s"></span>
+        <span class="dust" style="--x:18%;--y:62%;--s:5px;--o:1s;--d:-.7s"></span>
+        <span class="dust" style="--x:26%;--y:34%;--s:10px;--o:2s;--d:-1.4s"></span>
+        <span class="dust" style="--x:34%;--y:80%;--s:6px;--o:3s;--d:-2.1s"></span>
+        <span class="dust" style="--x:44%;--y:12%;--s:7px;--o:0s;--d:-2.8s"></span>
+        <span class="dust" style="--x:52%;--y:52%;--s:4px;--o:1s;--d:-3.5s"></span>
+        <span class="dust" style="--x:60%;--y:24%;--s:9px;--o:2s;--d:-4.2s"></span>
+        <span class="dust" style="--x:68%;--y:72%;--s:6px;--o:3s;--d:-4.9s"></span>
+        <span class="dust" style="--x:76%;--y:40%;--s:5px;--o:0s;--d:-5.6s"></span>
+        <span class="dust" style="--x:84%;--y:16%;--s:8px;--o:1s;--d:-6.3s"></span>
+        <span class="dust" style="--x:90%;--y:60%;--s:7px;--o:2s;--d:-7s"></span>
+        <span class="dust" style="--x:14%;--y:86%;--s:5px;--o:3s;--d:-7.7s"></span>
+        <span class="dust" style="--x:40%;--y:90%;--s:6px;--o:0s;--d:-8.4s"></span>
+        <span class="dust" style="--x:72%;--y:88%;--s:4px;--o:1s;--d:-9.1s"></span>
+        <span class="dust" style="--x:94%;--y:34%;--s:5px;--o:2s;--d:-9.8s"></span>
+        <span class="dust" style="--x:4%;--y:48%;--s:6px;--o:3s;--d:-10.5s"></span>
+      </div>
+
+      <div class="device-wrap" id="device" role="img" aria-label="Puff air purifier in Harmattan mode, display reading Clearing dust">
+        <div class="device">
+          <div class="window">
+            <svg class="fan" aria-hidden="true" width="150" height="150" viewBox="-50 -50 100 100">
+              <g fill="#f4efe9" opacity=".92">
+                <path d="M0 -4 C 10 -14, 30 -16, 42 -6 C 32 2, 14 6, 0 4 Z"/>
+                <path d="M0 -4 C 10 -14, 30 -16, 42 -6 C 32 2, 14 6, 0 4 Z" transform="rotate(72)"/>
+                <path d="M0 -4 C 10 -14, 30 -16, 42 -6 C 32 2, 14 6, 0 4 Z" transform="rotate(144)"/>
+                <path d="M0 -4 C 10 -14, 30 -16, 42 -6 C 32 2, 14 6, 0 4 Z" transform="rotate(216)"/>
+                <path d="M0 -4 C 10 -14, 30 -16, 42 -6 C 32 2, 14 6, 0 4 Z" transform="rotate(288)"/>
+              </g>
+              <circle r="10" style="fill: var(--glow)"/>
+              <circle r="4" fill="#2a211c"/>
+            </svg>
+          </div>
+          <div class="screen">
+            <span class="led"></span>
+            <span class="readout" id="readout">Clearing dust</span>
+          </div>
+          <div class="nubs"><span class="nub"></span><span class="nub pressed"></span><span class="nub"></span></div>
+          <div class="vents"><span></span><span></span><span></span></div>
+        </div>
+        <div class="floor"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features" aria-labelledby="features-title">
+    <div class="head">
+      <h2 id="features-title">Small, soft, and stubborn about dust.</h2>
+      <p>Everything that matters when the sky turns orange for weeks.</p>
+    </div>
+    <div class="tiles">
+      <article class="tile tile-wide">
+        <div class="copy">
+          <h3>Three layers, one breath</h3>
+          <p>Air passes through each layer in turn before it leaves the top.</p>
+        </div>
+        <div class="flow">
+          <span>Dusty air in</span>
+          <svg aria-hidden="true" width="28" height="16" viewBox="0 0 28 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h22M18 2l6 6-6 6"/></svg>
+          <div class="layer"><span class="swatch mesh" aria-hidden="true"></span><b>Pre-filter</b><small>Sand, hair, lint</small></div>
+          <div class="layer"><span class="swatch pleats" aria-hidden="true"></span><b>HEPA layer</b><small>Fine dust</small></div>
+          <div class="layer"><span class="swatch carbon" aria-hidden="true"></span><b>Carbon</b><small>Smoke, smells</small></div>
+          <svg aria-hidden="true" width="28" height="16" viewBox="0 0 28 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h22M18 2l6 6-6 6"/></svg>
+          <span>Clean air out</span>
+        </div>
+      </article>
+
+      <article class="tile tile-solid">
+        <svg aria-hidden="true" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2.5"/><path d="M22 11v2"/><path d="M11 9l-2.5 3.5h3L9 16"/></svg>
+        <div class="copy">
+          <h3>Keeps going when the light goes off</h3>
+          <p>A built-in battery takes over during outages, so the air stays clean all night. Runtime: 8 Hours.</p>
+        </div>
+      </article>
+
+      <article class="tile">
+        <span class="ring" aria-hidden="true"><span></span></span>
+        <div class="copy">
+          <h3>Tells you when the filter is tired</h3>
+          <p>The ring on the front shifts from green to orange as the filter fills up.</p>
+        </div>
+      </article>
+
+      <article class="tile tile-row">
+        <svg aria-hidden="true" width="88" height="56" viewBox="0 0 88 56" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 28h6M18 18v20M28 10v36M38 22v12M48 16v24M58 24v8M68 20v16M78 27v2"/></svg>
+        <div class="copy">
+          <h3>Quiet enough to sleep beside</h3>
+          <p>Sleep mode drops the fan to a whisper and dims the display. 24 dB.</p>
+        </div>
+      </article>
+
+      <article class="tile tile-row">
+        <svg aria-hidden="true" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c2 3 5 5 5 9a5 5 0 0 1-10 0c0-4 3-6 5-9z"/><path d="M10 14a2 2 0 0 0 2 2"/></svg>
+        <div class="copy">
+          <h3>Rinse the outer filter</h3>
+          <p>Harmattan clogs filters fast. Pop the pre-filter out, wash it under the tap, and slide it back. Swap the inner layers every 2 Months.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="quote" aria-label="What owners say">
+    <p class="words">“[A REAL CUSTOMER QUOTE GOES HERE]”</p>
+    <p class="who">— Aliyu,Kaduna</p>
+  </section>
+
+  <section class="order" id="order" aria-labelledby="order-title">
+    <div class="copy">
+      <h2 id="order-title">Get Puff before the dust does.</h2>
+      <p>Pre-orders ship in January. Free delivery in Kaduna.</p>
+    </div>
+    <button type="button">Pre-order — &#8358;45,000</button>
+  </section>
+
+  <footer class="footer">
+    <span>Puff is a fictional product concept.</span>
+    <span>Support · Warranty · Contact</span>
+  </footer>
+</div>
+</div>
+
+<script>
+(function () {
+  var MODES = {
+    dust:  { label: 'Harmattan', display: 'Clearing dust', bg: '#f3d9bf', blurb: 'Harmattan mode runs the fan hard and keeps going until the dust in the room settles.' },
+    sleep: { label: 'Sleep',     display: 'Quiet',         bg: '#dcdaf3', blurb: 'Sleep mode slows the fan to a whisper and dims the display to a soft glow.' },
+    fresh: { label: 'Fresh',     display: 'Fresh air',     bg: '#d2eddb', blurb: 'Fresh mode keeps a gentle, steady flow for everyday air.' }
+  };
+  var page = document.querySelector('.page');
+  var buttons = document.querySelectorAll('.mode');
+  var readout = document.getElementById('readout');
+  var blurb = document.getElementById('blurb');
+  var device = document.getElementById('device');
+  var themeColor = document.querySelector('meta[name="theme-color"]');
+
+  function setMode(key) {
+    var m = MODES[key];
+    page.setAttribute('data-mode', key);
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].setAttribute('aria-pressed', String(buttons[i].getAttribute('data-mode') === key));
+    }
+    readout.textContent = m.display;
+    blurb.textContent = m.blurb;
+    device.setAttribute('aria-label', 'Puff air purifier in ' + m.label + ' mode, display reading ' + m.display);
+    themeColor.setAttribute('content', m.bg);
+  }
+
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].addEventListener('click', function () { setMode(this.getAttribute('data-mode')); });
+  }
+})();
+</script>
+</body>
+</html>
